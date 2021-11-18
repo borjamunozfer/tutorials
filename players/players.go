@@ -10,9 +10,9 @@ type Player struct {
 var players = []Player{}
 
 //strconv
-func RegisterPlayers() error {
+func RegisterPlayers(numPlayers int) error {
 
-	for i := 0; i < 5; i++ {
+	for i := 0; i < numPlayers; i++ {
 		player := Player{Name: fmt.Sprintf("Player %d", i)}
 		players = append(players, player)
 	}
