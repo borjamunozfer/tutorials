@@ -1,0 +1,166 @@
+[
+    {
+        "uri": "features\\todos.feature",
+        "id": "todos-feature",
+        "keyword": "Feature",
+        "name": "Todos Feature",
+        "description": "As an user\nI want to be able to\ncreate and query TODOs ",
+        "line": 1,
+        "elements": [
+            {
+                "id": "todos-feature;create-posts",
+                "keyword": "Scenario",
+                "name": "Create posts",
+                "description": "",
+                "line": 6,
+                "type": "scenario",
+                "steps": [
+                    {
+                        "keyword": "Given ",
+                        "name": "valid request body",
+                        "line": 7,
+                        "match": {
+                            "location": "todos_test.go:129"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "When ",
+                        "name": "I send \"POST\" request to \"posts\"",
+                        "line": 8,
+                        "match": {
+                            "location": "todos_test.go:21"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 331966700
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the response status should be \"201 Created\"",
+                        "line": 9,
+                        "match": {
+                            "location": "todos_test.go:94"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 805700
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "the response should match json:",
+                        "line": 10,
+                        "doc_string": {
+                            "value": "{\n        \"id\": 101,\n        \"userId\": 2021,\n        \"title\": \"test title\",\n        \"body\": \"test body\"\n}        ",
+                            "content_type": "",
+                            "line": 11
+                        },
+                        "match": {
+                            "location": "todos_test.go:66"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "todos-feature;get-all-posts",
+                "keyword": "Scenario",
+                "name": "Get all posts",
+                "description": "",
+                "line": 20,
+                "type": "scenario",
+                "steps": [
+                    {
+                        "keyword": "When ",
+                        "name": "I send \"GET\" request to \"posts\"",
+                        "line": 21,
+                        "match": {
+                            "location": "todos_test.go:21"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 46465900
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "there are posts created",
+                        "line": 22,
+                        "match": {
+                            "location": "todos_test.go:102"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 11425400
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the response should be not empty",
+                        "line": 23,
+                        "match": {
+                            "location": "todos_test.go:58"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "todos-feature;get-one-post-by-id",
+                "keyword": "Scenario",
+                "name": "Get one post by id",
+                "description": "",
+                "line": 26,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@testtag",
+                        "line": 25
+                    }
+                ],
+                "steps": [
+                    {
+                        "keyword": "When ",
+                        "name": "I send \"GET\" request to \"posts/1\"",
+                        "line": 27,
+                        "match": {
+                            "location": "todos_test.go:21"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 46422500
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the response should match json:",
+                        "line": 28,
+                        "doc_string": {
+                            "value": "{\n    \"userId\": 1,\n    \"id\": 1,\n    \"title\": \"sunt aut facere repellat provident occaecati excepturi optio reprehenderit\",\n    \"body\": \"quia et suscipit\\nsuscipit recusandae consequuntur expedita et cum\\nreprehenderit molestiae ut ut quas totam\\nnostrum rerum est autem sunt rem eveniet architecto\"\n}",
+                            "content_type": "",
+                            "line": 29
+                        },
+                        "match": {
+                            "location": "todos_test.go:66"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 568300
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+]
