@@ -9,16 +9,23 @@ Then the file is created empty.
 
 Scenario: Open book
 Given the book "La Odisea" exists
-When I open the book
+When I open the book 
 Then the file is opened correctly
+
+Scenario: Open book does not exist
+Given the book "La Odisea" does not exist
+When I open the book non existent
+Then the file is created
 
 Scenario: Read book
 Given the book "La Odisea" exists
-When i read the book fully
+And the book is not empty
+When i read the book "La Odisea" fully
 Then the book content is returned
 
 Scenario: Read book line by line
 Given the book "La Odisea" exists
+And the book is not empty
 When I read the book by line
 Then I got one line at time
 

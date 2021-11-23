@@ -1,99 +1,96 @@
 package books
 
 import (
-	"errors"
+	"bufio"
 	"fmt"
-	"log"
+	"io"
 	"os"
 	"strings"
 )
 
 const bookPath = "/booksfile/"
 
-type Author struct {
-	Name  string
-	Books map[string]*os.File
+type BookClient struct {
+	book *os.File
 }
 
-func NewAuthor(name string) Author {
-	books := make(map[string]*os.File)
-	return Author{Name: name, Books: books}
-}
-
-func (a *Author) CreateBook(title string) error {
-	//Check book for this author does not exist
-	if _, ok := a.Books[title]; ok {
-		return fmt.Errorf("Book %s for author %s already exists", title, a.Name)
-	}
-
-	log.Printf("Book %s does not exist, proceeding to create it...", title)
-
-	//Need to create empty file
-	createdFile, err := newFile(title)
-	createdFile.Close()
+func (b *BookClient) OpenExistentBook(title string) error {
+	//this method is only READ mode
+	file, err := os.Open(bookPath + formatBookFilename(title))
 	if err != nil {
 		return err
 	}
-	a.Books[title] = createdFile
+	b.book = file
+	return nil
+}
+
+func (b *BookClient) OpenNonExistentBook(title string) error {
+	//this method returns an writable and readable file
+	file, err := os.OpenFile(bookPath+formatBookFilename(title), os.O_RDWR, 0755)
+	if err != nil {
+		return err
+	}
+	b.book = file
+	if _, err = b.book.Stat(); err != nil {
+		return fmt.Errorf("Failing OpenNonExistentBook")
+	}
+	return nil
+}
+
+func (b *BookClient) CreateBook(title string) error {
+	file, err := os.Create(bookPath + formatBookFilename(title))
+	if err != nil {
+		return err
+	}
+	b.book = file
+	return nil
+}
+
+func (b *BookClient) ReadFullBook(title string) ([]byte, error) {
+	fullContent, err := os.ReadFile(bookPath + formatBookFilename(title))
+	if err != nil {
+		return nil, err
+	}
+	if len(fullContent) == 0 {
+		return nil, fmt.Errorf("Book content is empty")
+	}
+	return fullContent, nil
+}
+
+func (b *BookClient) ReadBookByLine(w io.Writer) error {
+
+	scanner := bufio.NewScanner(b.book)
+
+	for scanner.Scan() {
+		fmt.Fprint(w, scanner.Text())
+	}
+	if err := scanner.Err(); err != nil {
+		return err
+	}
+	return nil
+}
+
+// Write content to filename specified. If it does not exist, it creates it.
+func (b *BookClient) WriteBook(filename string, content string) error {
+	err := os.WriteFile("."+bookPath+formatBookFilename(filename), []byte(content), 0755)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// Write string content
+func (b *BookClient) WriteContent(content string) error {
+	n, err := b.book.WriteString(content)
+	if err != nil {
+		return err
+	}
+	if len(content) != n {
+		return fmt.Errorf("Fail to write body %s", string(content))
+	}
 	return nil
 }
 
 func formatBookFilename(title string) string {
 	return strings.ToLower(strings.ReplaceAll(title, " ", "") + ".txt")
-}
-
-func newFile(title string) (*os.File, error) {
-	toValidFilename := formatBookFilename(title)
-
-	//create dir if not exist
-	//if any err received creating directory, then exit program
-	err := bookDirExists()
-	if err != nil {
-		log.Fatal(err)
-	}
-	//create file
-	bookFile, err := os.Create(bookPath + toValidFilename)
-	if err != nil {
-		return nil, err
-	}
-
-	return bookFile, nil
-}
-
-func bookDirExists() error {
-	//check if path exist; create if not
-	if _, err := os.Stat(bookPath); errors.Is(err, os.ErrNotExist) {
-		err := os.Mkdir(bookPath, os.ModePerm)
-		if err != nil {
-			log.Println(err)
-			return err
-		}
-	}
-	return nil
-}
-
-func (a *Author) RemoveLine() {
-
-}
-
-func (a *Author) RemoveBook() {
-
-}
-
-func (a *Author) ReadBook() {
-
-}
-
-func (a *Author) WriteBook(book *os.File, body string) error {
-
-	n, err := book.WriteString(body)
-	defer book.Close()
-	if err != nil {
-		return err
-	}
-	if len(body) != n {
-		return fmt.Errorf("Fail to write body")
-	}
-
-	return nil
 }
