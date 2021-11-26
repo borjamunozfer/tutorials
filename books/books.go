@@ -11,17 +11,25 @@ import (
 const bookPath = "/booksfile/"
 
 type BookClient struct {
-	book *os.File
+	book   *os.File
+	isOpen bool
 }
 
 func (b *BookClient) OpenExistentBook(title string) error {
 	//this method is only READ mode
-	file, err := os.Open(bookPath + formatBookFilename(title))
+	file, err := b.Open(title)
 	if err != nil {
 		return err
 	}
 	b.book = file
 	return nil
+}
+
+func (b *BookClient) Open(title string) (*os.File, error) {
+	file, err := os.Open(bookPath + formatBookFilename(title))
+
+	b.isOpen = err != nil
+	return file, err
 }
 
 func (b *BookClient) OpenNonExistentBook(title string) error {
@@ -31,13 +39,11 @@ func (b *BookClient) OpenNonExistentBook(title string) error {
 		return err
 	}
 	b.book = file
-	if _, err = b.book.Stat(); err != nil {
-		return fmt.Errorf("Failing OpenNonExistentBook")
-	}
 	return nil
 }
 
 func (b *BookClient) CreateBook(title string) error {
+
 	file, err := os.Create(bookPath + formatBookFilename(title))
 	if err != nil {
 		return err
@@ -47,6 +53,7 @@ func (b *BookClient) CreateBook(title string) error {
 }
 
 func (b *BookClient) ReadFullBook(title string) ([]byte, error) {
+
 	fullContent, err := os.ReadFile(bookPath + formatBookFilename(title))
 	if err != nil {
 		return nil, err
@@ -64,6 +71,9 @@ func (b *BookClient) ReadBookByLine(w io.Writer) error {
 	for scanner.Scan() {
 		fmt.Fprint(w, scanner.Text())
 	}
+
+	defer b.book.Close()
+
 	if err := scanner.Err(); err != nil {
 		return err
 	}
@@ -81,13 +91,31 @@ func (b *BookClient) WriteBook(filename string, content string) error {
 
 // Write string content
 func (b *BookClient) WriteContent(content string) error {
-	n, err := b.book.WriteString(content)
+
+	nbytes, err := b.book.WriteString(content)
 	if err != nil {
 		return err
 	}
-	if len(content) != n {
+	if len(content) != nbytes {
 		return fmt.Errorf("Fail to write body %s", string(content))
 	}
+	return nil
+}
+
+func (b *BookClient) DeleteBook(title string) error {
+
+	err := os.Remove(bookPath + formatBookFilename(title))
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (b *BookClient) Close() error {
+	if err := b.book.Close(); err != nil {
+		return err
+	}
+	b.isOpen = false
 	return nil
 }
 
